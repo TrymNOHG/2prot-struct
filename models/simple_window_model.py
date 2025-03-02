@@ -3,6 +3,7 @@ from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
 import numpy as np
 
+# Accuracy on 2000 samples :: 0.3698978429666714
 class TreeWindowModel:
     def __init__(self, window_length):
         self.WINDOW_LENGTH = window_length
