@@ -27,7 +27,7 @@ class MLPWindowModel:
             print("WARNING: Window length should probably be an odd number!")
         self.window_length = window_length
         self.model = MLP(window_length=window_length)
-        self.optim = nn.optim.Adam(nn.state.get_parameters(self.model))
+        self.optim = nn.optim.Adam(nn.state.get_parameters(self.model), lr=0.001)
         self.batch_size = 64
 
     def to_windows(self, X, y):
@@ -68,7 +68,8 @@ class MLPWindowModel:
         print("Number of windows", len(windows_X))
         return windows_X, windows_y
 
-    def fit(self, X_train, y_train, epochs=1, batch_size=None):
+    def fit(self, X_train, y_train, X_test=None, y_test=None, epochs=1, batch_size=None):
+        # If X_test and y_test then we can check test accuracy during training
         if batch_size is None:
             batch_size = self.batch_size
     
@@ -100,9 +101,16 @@ class MLPWindowModel:
                 epoch_loss += loss.item()
                 
                 if step % (steps_per_epoch // 10) == 0 and step > 0:
-                    print(f"Epoch {epoch+1}/{epochs} - Step {step}/{steps_per_epoch} - loss: {loss.item():.4f}")
+                    train_accuracy = self.evaluate(X_batch, y_batch)
+                    if X_train is not None and y_train is not None:
+                        test_accuracy = self.evaluate(X_train, y_train)
+                        print(f"Epoch {epoch+1}/{epochs} - Step {step}/{steps_per_epoch} - loss: {loss.item():.4f} - train accuracy: {train_accuracy:.2f} - test accuracy: {test_accuracy:.2f}")
+                    else:
+                        print(f"Epoch {epoch+1}/{epochs} - Step {step}/{steps_per_epoch} - loss: {loss.item():.4f} - train accuracy: {train_accuracy:.2f}")
             
             avg_loss = epoch_loss / steps_per_epoch
+            #accuracy = self.evaluate(X_train, y_train)
+            #print(f"Epoch {epoch+1}/{epochs} - avg_loss: {avg_loss:.4f} - accuracy: {accuracy:.4f}")
             print(f"Epoch {epoch+1}/{epochs} - avg_loss: {avg_loss:.4f}")
         
 
@@ -112,21 +120,23 @@ class MLPWindowModel:
             Tensor.training = False
             return self.model(X).softmax().argmax(axis=1)
         
-        predictions = predict(Tensor(X))
+        predictions = predict(Tensor(X)).numpy()
         return predictions
 
-    def pred(self, X, y):
-        # To TinyGrad tensors
-        X = Tensor(X)
-        y = Tensor(y)
+    def evaluate(self, X, y):
+        # If not already, turn into TinyGrad tensors
+        if not isinstance(X, Tensor):
+            X = Tensor(X)
+        if not isinstance(y, Tensor):
+            y = Tensor(y)
 
         @TinyJit
         def evaluate(X, y):
             Tensor.training = False
             predictions = self.model(X).softmax().argmax(axis=1)
-            # accuracy = (predictions == y).mean()
-            return predictions
-        
-        predictions = evaluate(X, y).numpy()
-        #print(f"Accuracy on {X.shape[0]} windows :: {accuracy:.4f}%")
-        return predictions
+            accuracy = (predictions == y).mean()
+            return accuracy
+
+        accuracy = evaluate(X, y).item()
+        # print(f"Accuracy on {X.shape[0]} windows :: {accuracy:.4f}%")
+        return accuracy
