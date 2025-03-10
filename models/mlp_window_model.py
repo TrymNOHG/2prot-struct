@@ -115,7 +115,7 @@ class MLPWindowModel:
         predictions = predict(Tensor(X))
         return predictions
 
-    def evaluate(self, X, y):
+    def pred(self, X, y):
         # To TinyGrad tensors
         X = Tensor(X)
         y = Tensor(y)
@@ -124,9 +124,9 @@ class MLPWindowModel:
         def evaluate(X, y):
             Tensor.training = False
             predictions = self.model(X).softmax().argmax(axis=1)
-            accuracy = (predictions == y).mean()
-            return accuracy
+            # accuracy = (predictions == y).mean()
+            return predictions
         
-        accuracy = evaluate(X, y).item()
-        print(f"Accuracy on {X.shape[0]} windows :: {accuracy:.4f}%")
-        return accuracy
+        predictions = evaluate(X, y).numpy()
+        #print(f"Accuracy on {X.shape[0]} windows :: {accuracy:.4f}%")
+        return predictions
