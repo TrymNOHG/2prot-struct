@@ -32,7 +32,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = ProteinLM().to(device)
 
 tokenizer = BertTokenizer.from_pretrained("Rostlab/prot_bert")
-encoding = tokenizer(sequences, padding=True, truncation=True, return_tensors="pt", max_length=358)
+encoding = tokenizer(sequences, padding=True, truncation=True, return_tensors="pt", max_length=33)
 
 input_ids, attention_mask = encoding["input_ids"].to(device), encoding["attention_mask"].to(device)
 
