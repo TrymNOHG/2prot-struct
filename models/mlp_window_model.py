@@ -9,7 +9,7 @@ random.seed(42)
 class MLP:
   def __init__(self, window_length=17):
     # The network architecture is based on the below link:
-    # https://se.mathworks.com/help/bioinfo/ug/predicting-protein-secondary-structure-using-a-neural-network.html
+    #  https://se.mathworks.com/help/bioinfo/ug/predicting-protein-secondary-structure-using-a-neural-network.html
     # First layer will be a one-hot encoding of the 20 amino acids for each position in the window
     self.l1 = nn.Linear(window_length*20, 256)
     self.l2 = nn.Linear(256, 64)
@@ -101,18 +101,15 @@ class MLPWindowModel:
                 epoch_loss += loss.item()
                 
                 if step % (steps_per_epoch // 10) == 0 and step > 0:
-                    train_accuracy = self.evaluate(X_batch, y_batch)
-                    if X_train is not None and y_train is not None:
-                        test_accuracy = self.evaluate(X_train, y_train)
-                        print(f"Epoch {epoch+1}/{epochs} - Step {step}/{steps_per_epoch} - loss: {loss.item():.4f} - train accuracy: {train_accuracy:.2f} - test accuracy: {test_accuracy:.2f}")
-                    else:
-                        print(f"Epoch {epoch+1}/{epochs} - Step {step}/{steps_per_epoch} - loss: {loss.item():.4f} - train accuracy: {train_accuracy:.2f}")
+                    print(f"Epoch {epoch+1}/{epochs} - Step {step}/{steps_per_epoch} - loss: {loss.item():.4f}")
             
             avg_loss = epoch_loss / steps_per_epoch
-            #accuracy = self.evaluate(X_train, y_train)
-            #print(f"Epoch {epoch+1}/{epochs} - avg_loss: {avg_loss:.4f} - accuracy: {accuracy:.4f}")
-            print(f"Epoch {epoch+1}/{epochs} - avg_loss: {avg_loss:.4f}")
-        
+            train_accuracy = self.evaluate(X_train, y_train)
+            if X_train is not None and y_train is not None:
+                test_accuracy = self.evaluate(X_test, y_test)
+                print(f"Epoch {epoch+1}/{epochs} - avg_loss: {avg_loss:.4f} - train accuracy: {train_accuracy:.2f} - test accuracy: {test_accuracy:.2f}")
+            else:
+                print(f"Epoch {epoch+1}/{epochs} - avg_loss: {avg_loss:.4f} - train accuracy: {train_accuracy:.2f}")
 
     def predict(self, X):
         @TinyJit
