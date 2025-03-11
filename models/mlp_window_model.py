@@ -67,11 +67,10 @@ class MLPWindowModel:
     def fit(self, X_train, y_train, X_test=None, y_test=None, epochs=5, batch_size=1024):
         n_samples = X_train.shape[0]
         steps_per_epoch = n_samples // batch_size
-        
-        # NOTE: Large batch size reduces the amount of memory transfers and kernel launches
-        #       but is worse for regularization(?)
-        #       Maybe we can do an entire epoch in one kernel launch?
 
+        # X_train = Tensor(X_train)
+        # y_train = Tensor(y_train)
+        
         @TinyJit
         def training_step(X_batch, y_batch):
             Tensor.training = True  # Enable dropout
@@ -80,20 +79,30 @@ class MLPWindowModel:
             self.optim.step()
             return loss
 
+        # NOTE: Large batch size reduces the amount of memory transfers and kernel launches
+        #       but is worse for regularization(?)
+        #       Maybe we can do an entire epoch in one kernel launch?
+        #       Results: Utilization barely improved for smaller batch sizes
+        @TinyJit
+        def training_epoch():
+            Tensor.training = True  # Enable dropout
+            losss = Tensor.ones(steps_per_epoch)
+            for _ in range(steps_per_epoch):
+                batch_indices = Tensor.randint(batch_size, high=X_train.shape[0])
+                
+                X_batch = X_train[batch_indices]
+                y_batch = y_train[batch_indices]
 
-        # X_train = Tensor(X_train)
-        # y_train = Tensor(y_train)
-        # @TinyJit
-        # def training_step(batch_indices):
-        #     Tensor.training = True  # Enable dropout
-        #     self.optim.zero_grad()
-        #     X_batch = X_train[batch_indices]
-        #     y_batch = y_train[batch_indices]
-        #     loss = self.model(X_batch).softmax().sparse_categorical_crossentropy(y_batch).backward()
-        #     self.optim.step()
-        #     return loss
-        
+                self.optim.zero_grad()
+                self.model(X_batch).softmax().sparse_categorical_crossentropy(y_batch).backward()
+                self.optim.step()
+                # losss = training_step(X_batch, y_batch)
+
+            return losss.mean()
+
         for epoch in range(epochs):
+            # avg_loss = training_epoch().numpy()
+
             # Shuffle indices for this epoch
             indices = np.random.permutation(n_samples)
             epoch_loss = 0
@@ -108,7 +117,7 @@ class MLPWindowModel:
                 loss = training_step(X_batch, y_batch)
 
                 #batch_indices = Tensor.randint(batch_size, high=X_train.shape[0])
-                #loss = training_step(batch_indices)
+
                 epoch_loss += loss.item()
                 
                 if step % (steps_per_epoch // 10) == 0 and step > 0:
