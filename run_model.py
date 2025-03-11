@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 
-df = pd.read_csv("data/data.csv")
+df = pd.read_csv("pLM/data.csv")
 
 y = df['dssp8'][:1000]
 X_original = df['input'][:1000]
