@@ -28,7 +28,7 @@ class MLPWindowModel:
         self.window_length = window_length
         self.model = MLP(window_length=window_length)
         self.optim = nn.optim.Adam(nn.state.get_parameters(self.model), lr=0.001)
-        self.batch_size = 64
+        self.batch_size = 32
 
     def to_windows(self, X, y):
         secondary_structures = "HECTGSPIB"
