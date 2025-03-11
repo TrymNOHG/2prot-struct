@@ -33,8 +33,8 @@ def oversample_windows(windows_X, windows_y):
 
 df = pd.read_csv("data/data.csv")
 
-y = df['dssp8'][:5_000]
-X_original = df['input'][:5_000]
+y = df['dssp8'][:3_000]
+X_original = df['input'][:3_000]
 
 model = MLPWindowModel(window_length=17)
 X, y = model.to_windows(X_original, y)
