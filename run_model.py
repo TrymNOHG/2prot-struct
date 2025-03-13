@@ -53,11 +53,13 @@ Trymmi stuff
 X_train, X_test, y_train, y_test = train_test_split(X_original, y, test_size=0.2, random_state=42)
 
 from models.simple_window_model import TreeWindowModel
+from models.stochastic_model import StochasticModel
 
-#model = TreeWindowModel(window_length=5)
-#model.fit(X_train, y_train)
-#print(model.evaluate(X_test, y_test))
 
-model = MLPWindowModel(window_length=window_length)
-model.fit(X_train, y_train, X_test, y_test)
+# model = TreeWindowModel(window_length=17)
+model = StochasticModel()
+# model.fit(X_train, y_train)
+model.fit(y_train)
+
+print(model.evaluate(X_test, y_test))
 """
