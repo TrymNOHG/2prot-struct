@@ -20,7 +20,6 @@ class StochasticModel:
     def predict(self, X):
         if self.probs is None:
             raise ValueError("Model must be fit before evaluation.")
-        
         predictions = []
         for aa in X:
             pred = []
@@ -40,13 +39,13 @@ class StochasticModel:
         if self.probs is None:
             raise ValueError("Model must be fit before evaluation.")
         predictions = self.predict(X)
-
         correct = 0
         total = 0
-        for i in range(len(y)):
-            for j in range(len(y[i])):
-                correct += 1 if predictions[i][j] == y[i][j] else 0
+        i = 0
+        for index, value in y.items():
+            for (j, val) in enumerate(value):
+                correct += 1 if predictions[i][j] == val else 0
                 total += 1
-        
+            i += 1
         print(f"Accuracy of the model is {correct/total}")
         return correct/total
