@@ -22,9 +22,9 @@ def store_predictions(y_test, y_pred, filename):
         pickle.dump((y_test, y_pred), f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-LOAD_DATA = False
+LOAD_DATA = True
 LOAD_DATA_FILENAME = "data/over_under_sampled_data.pkl"
-STORE_DATA = True
+STORE_DATA = False
 STORE_DATA_FILENAME = "data/over_under_sampled_data.pkl"
 STORE_PREDICTIONS = False
 STORE_PREDICTIONS_FILENAME = "data/predictions.pkl"
@@ -49,7 +49,6 @@ if __name__ == "__main__":
         if STORE_DATA:
             store_data(X_train, y_train, X_test, y_test, X_val, y_val, STORE_DATA_FILENAME)
 
-    exit(0)
     model.fit(X_train, y_train, X_val, y_val, epochs=5)
     y_pred = model.predict(X_test)
 
