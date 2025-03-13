@@ -11,14 +11,14 @@ class MLP:
     # The network architecture is based on the below link:
     #  https://se.mathworks.com/help/bioinfo/ug/predicting-protein-secondary-structure-using-a-neural-network.html
     # First layer will be a one-hot encoding of the 20 amino acids for each position in the window
-    self.l1 = nn.Linear(window_length*20, 256)
-    self.l2 = nn.Linear(256, 64)
-    self.l3 = nn.Linear(64, 8)
+    self.l1 = nn.Linear(window_length*20, 512)
+    self.l2 = nn.Linear(512, 128)
+    self.l3 = nn.Linear(128, 8)
 
   def __call__(self, x:Tensor) -> Tensor:
     x = self.l1(x.flatten(1)).relu()
     x = self.l2(x).relu()
-    return self.l3(x.dropout(0.5))
+    return self.l3(x)
 
 
 class MLPWindowModel:
