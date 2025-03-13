@@ -64,7 +64,7 @@ class MLPWindowModel:
         print("Number of windows", len(windows_X))
         return windows_X, windows_y
 
-    def fit(self, X_train, y_train, X_test=None, y_test=None, epochs=5, batch_size=1024):
+    def fit(self, X_train, y_train, X_val=None, y_val=None, epochs=5, batch_size=1024):
         n_samples = X_train.shape[0]
         steps_per_epoch = n_samples // batch_size
 
@@ -126,7 +126,7 @@ class MLPWindowModel:
             avg_loss = epoch_loss / steps_per_epoch
             train_accuracy = self.evaluate(X_train, y_train)
             if X_train is not None and y_train is not None:
-                test_accuracy = self.evaluate(X_test, y_test)
+                test_accuracy = self.evaluate(X_val, y_val)
                 print(f"Epoch {epoch+1}/{epochs} - avg_loss: {avg_loss:.4f} - train accuracy: {train_accuracy:.2f} - test accuracy: {test_accuracy:.2f}")
             else:
                 print(f"Epoch {epoch+1}/{epochs} - avg_loss: {avg_loss:.4f} - train accuracy: {train_accuracy:.2f}")
