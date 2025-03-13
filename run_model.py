@@ -7,9 +7,9 @@ from models.mlp_window_model import MLPWindowModel
 import eval_model
 
 
-def store_data(X_train, y_train, X_test, y_test, filename):
+def store_data(X_train, y_train, X_test, y_test, X_val, y_val, filename):
     with open(filename, 'wb') as f:
-        pickle.dump((X_train, y_train, X_test, y_test), f, protocol=pickle.HIGHEST_PROTOCOL)
+        pickle.dump((X_train, y_train, X_test, y_test, X_val, y_val), f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 def load_data(filename):
@@ -26,33 +26,29 @@ LOAD_DATA = False
 LOAD_DATA_FILENAME = "data/over_under_sampled_data.pkl"
 STORE_DATA = False
 STORE_DATA_FILENAME = "data/over_under_sampled_data.pkl"
-STORE_PREDICTIONS = True
+STORE_PREDICTIONS = False
 STORE_PREDICTIONS_FILENAME = "data/predictions.pkl"
 
 
 model = MLPWindowModel(window_length=17)
 
 if LOAD_DATA:
-    X_train, y_train, X_test, y_test = load_data(LOAD_DATA_FILENAME)
+    X_train, y_train, X_test, y_test, X_val, y_val = load_data(LOAD_DATA_FILENAME)
 else:
     df = pd.read_csv("data/data.csv")
-
-    y = df['dssp8'][:]]
-    X_original = df['input'][:]
-
+    y = df['dssp8'][:100]
+    X_original = df['input'][:100]
     X, y = model.to_windows(X_original, y)
 
+    # Note: the validation nor test split keep the original dataset distribution balance
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=42)
     X_train, y_train = over_under_sample(X_train, y_train)
-    # for the first 3000 datapoints,
-    #  oversampling gives 1_447_173 
-    #  over_under gives     723_582
-    #  no sampling          475_638
     print("Number of windows in training set", len(X_train))
     if STORE_DATA:
-        store_data(X_train, y_train, X_test, y_test, STORE_DATA_FILENAME)
+        store_data(X_train, y_train, X_test, y_test, X_val, y_val, STORE_DATA_FILENAME)
 
-model.fit(X_train, y_train, X_test, y_test, epochs=5)
+model.fit(X_train, y_train, X_val, y_val, epochs=5)
 y_pred = model.predict(X_test)
 
 if STORE_PREDICTIONS:
