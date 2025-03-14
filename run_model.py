@@ -3,7 +3,7 @@ from sklearn.model_selection import train_test_split
 import pickle
 
 from sampling import over_under_sample_windows
-from models.mlp_window_model import MLPWindowModel
+from models.mlp_window_model import MLPModel
 import eval_model
 
 
@@ -31,7 +31,7 @@ STORE_PREDICTIONS_FILENAME = "data/predictions.pkl"
 
 
 if __name__ == "__main__":
-    model = MLPWindowModel(window_length=17)
+    model = MLPModel(window_length=17)
 
     if LOAD_DATA:
         X_train, y_train, X_test, y_test, X_val, y_val = load_data(LOAD_DATA_FILENAME)

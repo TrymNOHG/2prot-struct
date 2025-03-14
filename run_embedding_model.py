@@ -7,6 +7,7 @@ from sampling import over_under_sample
 from run_model import load_data, store_data
 
 from models.mlp_embedding_model import MLPEmbeddingModel
+from models.mlp_window_model import MLPModel, MLPEmbeddings
 
 
 # NOTE: A lot of code here is basically the same as run_model.py
@@ -20,7 +21,7 @@ STORE_PREDICTIONS = False
 STORE_PREDICTIONS_FILENAME = "data/predictions.pkl"
 
 if __name__ == "__main__":
-    model = MLPEmbeddingModel()
+    model = MLPModel(model=MLPEmbeddings())
 
     if LOAD_DATA:
         X_train, y_train, X_test, y_test, X_val, y_val = load_data(LOAD_DATA_FILENAME)

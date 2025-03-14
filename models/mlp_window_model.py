@@ -20,13 +20,27 @@ class MLP:
     x = self.l2(x).relu()
     return self.l3(x)
 
+class MLPEmbeddings:
+    def __init__(self):
+        self.l1 = nn.Linear(1024, 512)
+        self.l2 = nn.Linear(512, 128)
+        self.l3 = nn.Linear(128, 8)
 
-class MLPWindowModel:
-    def __init__(self, window_length=17):
+    def __call__(self, x:Tensor) -> Tensor:
+        x = self.l1(x.flatten(1)).relu()
+        x = self.l2(x).relu()
+        return self.l3(x)
+
+
+class MLPModel:
+    def __init__(self, window_length=17, model=None):
         if window_length % 2 == 0:
             print("WARNING: Window length should probably be an odd number!")
         self.window_length = window_length
-        self.model = MLP(window_length=window_length)
+        if model is None:
+            self.model = MLP(window_length=window_length)
+        else:
+            self.model = model
         self.optim = nn.optim.Adam(nn.state.get_parameters(self.model), lr=0.001)
 
     def to_windows(self, X, y):
@@ -64,7 +78,7 @@ class MLPWindowModel:
         print("Number of windows", len(windows_X))
         return windows_X, windows_y
 
-    def fit(self, X_train, y_train, X_val=None, y_val=None, epochs=5, batch_size=1024):
+    def fit(self, X_train, y_train, X_val=None, y_val=None, epochs=5, batch_size=8):
         n_samples = X_train.shape[0]
         steps_per_epoch = n_samples // batch_size
 
