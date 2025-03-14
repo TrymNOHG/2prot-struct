@@ -82,8 +82,15 @@ class MLPModel:
         n_samples = X_train.shape[0]
         steps_per_epoch = n_samples // batch_size
 
+        train_losses = []
+        validation_losses = []
+
         # X_train = Tensor(X_train)
         # y_train = Tensor(y_train)
+        X_train_as_tensor = Tensor(X_train)
+        y_train_as_tensor = Tensor(y_train)
+        X_val = Tensor(X_val)
+        y_val = Tensor(y_val)
         
         @TinyJit
         def training_step(X_batch, y_batch):
@@ -91,6 +98,12 @@ class MLPModel:
             self.optim.zero_grad()
             loss = self.model(X_batch).softmax().sparse_categorical_crossentropy(y_batch).backward()
             self.optim.step()
+            return loss
+
+        @TinyJit
+        def compute_loss(X, y):
+            self.optim.zero_grad()
+            loss = self.model(X).softmax().sparse_categorical_crossentropy(y).backward()
             return loss
 
         # NOTE: Large batch size reduces the amount of memory transfers and kernel launches
@@ -139,11 +152,19 @@ class MLPModel:
             
             avg_loss = epoch_loss / steps_per_epoch
             train_accuracy = self.evaluate(X_train, y_train)
-            if X_train is not None and y_train is not None:
+            if X_val is not None and y_val is not None:
+                #train_loss = compute_loss(X_train_as_tensor, y_train_as_tensor)
+                #train_losses.append(train_loss)
+                train_losses.append(avg_loss)
+                validation_loss = compute_loss(X_val, y_val).numpy()
+                validation_losses.append(validation_loss)
+
                 test_accuracy = self.evaluate(X_val, y_val)
                 print(f"Epoch {epoch+1}/{epochs} - avg_loss: {avg_loss:.4f} - train accuracy: {train_accuracy:.2f} - test accuracy: {test_accuracy:.2f}")
             else:
                 print(f"Epoch {epoch+1}/{epochs} - avg_loss: {avg_loss:.4f} - train accuracy: {train_accuracy:.2f}")
+
+        return train_losses, validation_losses
 
     def predict(self, X):
         @TinyJit

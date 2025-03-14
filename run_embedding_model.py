@@ -5,8 +5,8 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sampling import over_under_sample
 from run_model import load_data, store_data
+from gen_graphs import loss_graph
 
-from models.mlp_embedding_model import MLPEmbeddingModel
 from models.mlp_window_model import MLPModel, MLPEmbeddings
 
 
@@ -45,7 +45,10 @@ if __name__ == "__main__":
         if STORE_DATA:
             store_data(X_train, y_train, X_test, y_test, X_val, y_val, STORE_DATA_FILENAME)
 
-    model.fit(X_train, y_train, X_val, y_val, epochs=5)
+    train_losses, validation_losses = model.fit(X_train, y_train, X_val, y_val, epochs=5)
+    loss_graph(train_losses, validation_losses)
+
+
     y_pred = model.predict(X_test)
 
     # if STORE_PREDICTIONS:

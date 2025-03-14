@@ -43,5 +43,26 @@ def data_distribution():
     plot_distribution(val_counts, "Validation Set Distribution", "val_distribution.png")
 
 
+def loss_graph(train_losses, validation_losses):
+    os.makedirs("graphs", exist_ok=True)
+
+    # Start epochs from 1
+    epochs = list(range(1, len(train_losses) + 1))
+
+    plt.figure(figsize=(8, 5))
+    plt.plot(epochs, train_losses, label="Training Loss", marker="o", linestyle="-")
+    plt.plot(epochs, validation_losses, label="Validation Loss", marker="s", linestyle="--")
+    
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.title("Training and Validation Loss")
+    plt.legend()
+    plt.grid(True, linestyle="--", alpha=0.7)
+    
+    # Save the figure
+    plt.savefig(os.path.join("graphs", "loss_curve.png"))
+    plt.close()
+
+
 if __name__ == "__main__":
     data_distribution()

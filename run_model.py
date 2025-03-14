@@ -5,6 +5,7 @@ import pickle
 from sampling import over_under_sample_windows
 from models.mlp_window_model import MLPModel
 import eval_model
+from gen_graphs import *
 
 
 def store_data(X_train, y_train, X_test, y_test, X_val, y_val, filename):
@@ -49,7 +50,8 @@ if __name__ == "__main__":
         if STORE_DATA:
             store_data(X_train, y_train, X_test, y_test, X_val, y_val, STORE_DATA_FILENAME)
 
-    model.fit(X_train, y_train, X_val, y_val, epochs=5)
+    train_losses, validation_losses = model.fit(X_train, y_train, X_val, y_val, epochs=5)
+    loss_graph(train_losses, validation_losses)
     y_pred = model.predict(X_test)
 
     if STORE_PREDICTIONS:
