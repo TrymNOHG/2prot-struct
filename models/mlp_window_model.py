@@ -30,15 +30,15 @@ class LinearCro:
 
 class MLPEmbeddings:
     def __init__(self):
-        #self.l1 = nn.Linear(1024, 512)
-        #self.l2 = nn.Linear(512, 128)
-        #self.l3 = nn.Linear(128, 8)
-        self.l1 = LinearCro(1024, 512)
-        self.l2 = LinearCro(512, 128)
-        self.l3 = LinearCro(128, 8)
+        self.l1 = nn.Linear(1024, 512)
+        self.l2 = nn.Linear(512, 128)
+        self.l3 = nn.Linear(128, 8)
+        # self.l1 = LinearCro(1024, 512)
+        # self.l2 = LinearCro(512, 128)
+        # self.l3 = LinearCro(128, 8)
 
     def __call__(self, x:Tensor) -> Tensor:
-        x = self.l1(x.flatten(1)).selu()
+        x = self.l1(x.flatten(1)).relu()
         x = self.l2(x).selu()
         return self.l3(x)
 
