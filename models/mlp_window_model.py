@@ -20,15 +20,26 @@ class MLP:
     x = self.l2(x).relu()
     return self.l3(x)
 
+class LinearCro:
+  def __init__(self, in_features, out_features, bias=True, initialization: str='kaiming_uniform'):
+    self.weight = getattr(Tensor, initialization)(out_features, in_features)
+    self.bias = Tensor.zeros(out_features) if bias else None
+
+  def __call__(self, x):
+    return x.linear(self.weight.transpose(), self.bias)
+
 class MLPEmbeddings:
     def __init__(self):
-        self.l1 = nn.Linear(1024, 512)
-        self.l2 = nn.Linear(512, 128)
-        self.l3 = nn.Linear(128, 8)
+        #self.l1 = nn.Linear(1024, 512)
+        #self.l2 = nn.Linear(512, 128)
+        #self.l3 = nn.Linear(128, 8)
+        self.l1 = LinearCro(1024, 512)
+        self.l2 = LinearCro(512, 128)
+        self.l3 = LinearCro(128, 8)
 
     def __call__(self, x:Tensor) -> Tensor:
-        x = self.l1(x.flatten(1)).relu()
-        x = self.l2(x).relu()
+        x = self.l1(x.flatten(1)).selu()
+        x = self.l2(x).selu()
         return self.l3(x)
 
 
