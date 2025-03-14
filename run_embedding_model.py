@@ -4,8 +4,8 @@ import eval_model
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sampling import over_under_sample
-from run_model import load_data, store_data
-from gen_graphs import loss_graph
+import run_model
+import gen_graphs
 
 from models.mlp_window_model import MLPModel, MLPEmbeddings
 
@@ -24,15 +24,12 @@ if __name__ == "__main__":
     model = MLPModel(model=MLPEmbeddings())
 
     if LOAD_DATA:
-        X_train, y_train, X_test, y_test, X_val, y_val = load_data(LOAD_DATA_FILENAME)
+        X_train, y_train, X_test, y_test, X_val, y_val = run_model.load_data(LOAD_DATA_FILENAME)
     else:
-        df = pd.read_csv("data/embeddings.csv")
-
-        X = df["input"].map(json.loads)
-        y = df["dssp8"].values  
-
-        X = np.array(X[0][:200])
-        y = np.array(list(y[0][:200]))
+        df = pd.read_csv("data/embedding_data_small.csv")
+        # X = df["input"].map(json.loads)
+        X = df.iloc[:, 0:1024].values  # Extracts values as a NumPy array
+        y = df["dssp8"].values
 
         secondary_structures = "HECTGSPIB"
         secondary_structure_to_idx = {ss: i for i, ss in enumerate(secondary_structures)}
@@ -41,18 +38,18 @@ if __name__ == "__main__":
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=42)
         X_train, y_train = over_under_sample(X_train, y_train)
-        print("Number of windows in training set", len(X_train))
+        print("Number of data points in training set", len(X_train))
         if STORE_DATA:
-            store_data(X_train, y_train, X_test, y_test, X_val, y_val, STORE_DATA_FILENAME)
+            run_model.store_data(X_train, y_train, X_test, y_test, X_val, y_val, STORE_DATA_FILENAME)
 
     train_losses, validation_losses = model.fit(X_train, y_train, X_val, y_val, epochs=5)
-    loss_graph(train_losses, validation_losses)
+    gen_graphs.loss_graph(train_losses, validation_losses)
 
 
     y_pred = model.predict(X_test)
 
-    # if STORE_PREDICTIONS:
-    #     store_predictions(y_test, y_pred, STORE_PREDICTIONS_FILENAME)
+    if STORE_PREDICTIONS:
+        run_model.store_predictions(y_test, y_pred, STORE_PREDICTIONS_FILENAME)
 
     results = eval_model.evaluate_classification(y_test, y_pred)
     eval_model.evaluation_summary(results)

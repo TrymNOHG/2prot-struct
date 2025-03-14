@@ -72,7 +72,11 @@ class MLPModel:
                         windows_X[window_idx, pos, aa_to_idx[aa]] = 1.0
                 
                 windows_y[window_idx] = secondary_structure_to_idx[label]
-                window_idx += 1
+                # l = secondary_structure_to_idx[label]
+                # if l > 2: 
+                #     l = 2
+                # windows_y[window_idx] = l
+                # window_idx += 1
 
         print("Number of sequences", len(X))
         print("Number of windows", len(windows_X))
@@ -116,6 +120,7 @@ class MLPModel:
 
 
         n_samples = X_train.shape[0]
+        # steps_per_epoch = (n_samples // batch_size) + 1
         steps_per_epoch = n_samples // batch_size
 
         # X_train = Tensor(X_train)

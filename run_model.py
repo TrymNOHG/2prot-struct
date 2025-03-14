@@ -5,7 +5,7 @@ import pickle
 from sampling import over_under_sample_windows
 from models.mlp_window_model import MLPModel
 import eval_model
-from gen_graphs import *
+# from gen_graphs import *
 
 
 def store_data(X_train, y_train, X_test, y_test, X_val, y_val, filename):
@@ -41,6 +41,8 @@ if __name__ == "__main__":
         y = df['dssp8'][:1_000]
         X_original = df['input'][:1_000]
         X, y = model.to_windows(X_original, y)
+        # if y > 2, then y = 2 (y is a numpy array of ints)
+        # y[y > 2] = 2
 
         # Note: the validation nor test split keep the original dataset distribution balance
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -51,7 +53,7 @@ if __name__ == "__main__":
             store_data(X_train, y_train, X_test, y_test, X_val, y_val, STORE_DATA_FILENAME)
 
     train_losses, validation_losses = model.fit(X_train, y_train, X_val, y_val, epochs=5)
-    loss_graph(train_losses, validation_losses)
+    # loss_graph(train_losses, validation_losses)
     y_pred = model.predict(X_test)
 
     if STORE_PREDICTIONS:
