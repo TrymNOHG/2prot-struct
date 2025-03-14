@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 import pickle
 
-from sampling import over_under_sample
+from sampling import over_under_sample_windows
 from models.mlp_window_model import MLPWindowModel
 import eval_model
 
@@ -44,7 +44,7 @@ if __name__ == "__main__":
         # Note: the validation nor test split keep the original dataset distribution balance
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=42)
-        X_train, y_train = over_under_sample(X_train, y_train)
+        X_train, y_train = over_under_sample_windows(X_train, y_train)
         print("Number of windows in training set", len(X_train))
         if STORE_DATA:
             store_data(X_train, y_train, X_test, y_test, X_val, y_val, STORE_DATA_FILENAME)
