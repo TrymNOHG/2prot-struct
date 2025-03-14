@@ -23,7 +23,7 @@ def store_predictions(y_test, y_pred, filename):
         pickle.dump((y_test, y_pred), f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-LOAD_DATA = True
+LOAD_DATA = False
 LOAD_DATA_FILENAME = "data/over_under_sampled_data.pkl"
 STORE_DATA = False
 STORE_DATA_FILENAME = "data/over_under_sampled_data.pkl"

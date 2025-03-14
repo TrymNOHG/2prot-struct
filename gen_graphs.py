@@ -46,12 +46,9 @@ def data_distribution():
 def loss_graph(train_losses, validation_losses):
     os.makedirs("graphs", exist_ok=True)
 
-    # Start epochs from 1
-    epochs = list(range(1, len(train_losses) + 1))
-
     plt.figure(figsize=(8, 5))
-    plt.plot(epochs, train_losses, label="Training Loss", marker="o", linestyle="-")
-    plt.plot(epochs, validation_losses, label="Validation Loss", marker="s", linestyle="--")
+    plt.plot(train_losses, label="Training Loss", marker="o", linestyle="-")
+    plt.plot(validation_losses, label="Validation Loss", marker="s", linestyle="--")
     
     plt.xlabel("Epoch")
     plt.ylabel("Loss")

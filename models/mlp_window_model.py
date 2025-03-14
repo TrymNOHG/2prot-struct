@@ -78,20 +78,7 @@ class MLPModel:
         print("Number of windows", len(windows_X))
         return windows_X, windows_y
 
-    def fit(self, X_train, y_train, X_val=None, y_val=None, epochs=5, batch_size=8):
-        n_samples = X_train.shape[0]
-        steps_per_epoch = n_samples // batch_size
-
-        train_losses = []
-        validation_losses = []
-
-        # X_train = Tensor(X_train)
-        # y_train = Tensor(y_train)
-        X_train_as_tensor = Tensor(X_train)
-        y_train_as_tensor = Tensor(y_train)
-        X_val = Tensor(X_val)
-        y_val = Tensor(y_val)
-        
+    def fit(self, X_train, y_train, X_val=None, y_val=None, epochs=5, batch_size=512):
         @TinyJit
         def training_step(X_batch, y_batch):
             Tensor.training = True  # Enable dropout
@@ -126,6 +113,20 @@ class MLPModel:
                 # losss = training_step(X_batch, y_batch)
 
             return losss.mean()
+
+
+        n_samples = X_train.shape[0]
+        steps_per_epoch = n_samples // batch_size
+
+        # X_train = Tensor(X_train)
+        # y_train = Tensor(y_train)
+        X_train_as_tensor = Tensor(X_train)
+        y_train_as_tensor = Tensor(y_train)
+        X_val = Tensor(X_val)
+        y_val = Tensor(y_val)
+
+        train_losses = [compute_loss(X_train_as_tensor, y_train_as_tensor).numpy()]
+        validation_losses = [compute_loss(X_val, y_val).numpy()]
 
         for epoch in range(epochs):
             # avg_loss = training_epoch().numpy()
