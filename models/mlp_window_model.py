@@ -30,8 +30,8 @@ class LinearCro:
 
 class MLPEmbeddings:
     def __init__(self):
-        self.l1 = nn.Linear(1024, 512)
-        self.l2 = nn.Linear(512, 128)
+        self.l1 = nn.Linear(642, 256)
+        self.l2 = nn.Linear(256, 128)
         self.l3 = nn.Linear(128, 8)
         # self.l1 = LinearCro(1024, 512)
         # self.l2 = LinearCro(512, 128)
@@ -164,7 +164,7 @@ class MLPModel:
 
                 epoch_loss += loss.item()
                 
-                if step % (steps_per_epoch // 10) == 0 and step > 0:
+                if steps_per_epoch > 10 and step % (steps_per_epoch // 10) == 0 and step > 0:
                     print(f"Epoch {epoch+1}/{epochs} - Step {step}/{steps_per_epoch} - loss: {loss.item():.4f}")
             
             avg_loss = epoch_loss / steps_per_epoch

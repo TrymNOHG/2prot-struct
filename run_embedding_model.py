@@ -26,9 +26,9 @@ if __name__ == "__main__":
     if LOAD_DATA:
         X_train, y_train, X_test, y_test, X_val, y_val = run_model.load_data(LOAD_DATA_FILENAME)
     else:
-        df = pd.read_csv("data/embeddings_10k.csv")
+        df = pd.read_csv("data/nico_95.csv")
         # X = df["input"].map(json.loads)
-        X = df.iloc[:, 0:1024].values
+        X = df.iloc[:, 0:642].values
         y = df["dssp8"].values
 
         secondary_structures = "HECTGSPIB"
