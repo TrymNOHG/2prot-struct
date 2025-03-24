@@ -20,13 +20,38 @@ class MLP:
     x = self.l2(x).relu()
     return self.l3(x)
 
+class LinearCro:
+  def __init__(self, in_features, out_features, bias=True, initialization: str='kaiming_uniform'):
+    self.weight = getattr(Tensor, initialization)(out_features, in_features)
+    self.bias = Tensor.zeros(out_features) if bias else None
 
-class MLPWindowModel:
-    def __init__(self, window_length=17):
+  def __call__(self, x):
+    return x.linear(self.weight.transpose(), self.bias)
+
+class MLPEmbeddings:
+    def __init__(self):
+        self.l1 = nn.Linear(642, 256)
+        self.l2 = nn.Linear(256, 128)
+        self.l3 = nn.Linear(128, 8)
+        # self.l1 = LinearCro(1024, 512)
+        # self.l2 = LinearCro(512, 128)
+        # self.l3 = LinearCro(128, 8)
+
+    def __call__(self, x:Tensor) -> Tensor:
+        x = self.l1(x.flatten(1)).relu()
+        x = self.l2(x).selu()
+        return self.l3(x)
+
+
+class MLPModel:
+    def __init__(self, window_length=17, model=None):
         if window_length % 2 == 0:
             print("WARNING: Window length should probably be an odd number!")
         self.window_length = window_length
-        self.model = MLP(window_length=window_length)
+        if model is None:
+            self.model = MLP(window_length=window_length)
+        else:
+            self.model = model
         self.optim = nn.optim.Adam(nn.state.get_parameters(self.model), lr=0.001)
 
     def to_windows(self, X, y):
@@ -58,25 +83,29 @@ class MLPWindowModel:
                         windows_X[window_idx, pos, aa_to_idx[aa]] = 1.0
                 
                 windows_y[window_idx] = secondary_structure_to_idx[label]
-                window_idx += 1
+                # l = secondary_structure_to_idx[label]
+                # if l > 2: 
+                #     l = 2
+                # windows_y[window_idx] = l
+                # window_idx += 1
 
         print("Number of sequences", len(X))
         print("Number of windows", len(windows_X))
         return windows_X, windows_y
 
-    def fit(self, X_train, y_train, X_val=None, y_val=None, epochs=5, batch_size=1024):
-        n_samples = X_train.shape[0]
-        steps_per_epoch = n_samples // batch_size
-
-        # X_train = Tensor(X_train)
-        # y_train = Tensor(y_train)
-        
+    def fit(self, X_train, y_train, X_val=None, y_val=None, epochs=5, batch_size=512):
         @TinyJit
         def training_step(X_batch, y_batch):
             Tensor.training = True  # Enable dropout
             self.optim.zero_grad()
             loss = self.model(X_batch).softmax().sparse_categorical_crossentropy(y_batch).backward()
             self.optim.step()
+            return loss
+
+        @TinyJit
+        def compute_loss(X, y):
+            self.optim.zero_grad()
+            loss = self.model(X).softmax().sparse_categorical_crossentropy(y).backward()
             return loss
 
         # NOTE: Large batch size reduces the amount of memory transfers and kernel launches
@@ -100,6 +129,21 @@ class MLPWindowModel:
 
             return losss.mean()
 
+
+        n_samples = X_train.shape[0]
+        # steps_per_epoch = (n_samples // batch_size) + 1
+        steps_per_epoch = n_samples // batch_size
+
+        # X_train = Tensor(X_train)
+        # y_train = Tensor(y_train)
+        X_train_as_tensor = Tensor(X_train)
+        y_train_as_tensor = Tensor(y_train)
+        X_val = Tensor(X_val)
+        y_val = Tensor(y_val)
+
+        train_losses = [compute_loss(X_train_as_tensor, y_train_as_tensor).numpy()]
+        validation_losses = [compute_loss(X_val, y_val).numpy()]
+
         for epoch in range(epochs):
             # avg_loss = training_epoch().numpy()
 
@@ -120,16 +164,24 @@ class MLPWindowModel:
 
                 epoch_loss += loss.item()
                 
-                if step % (steps_per_epoch // 10) == 0 and step > 0:
+                if steps_per_epoch > 10 and step % (steps_per_epoch // 10) == 0 and step > 0:
                     print(f"Epoch {epoch+1}/{epochs} - Step {step}/{steps_per_epoch} - loss: {loss.item():.4f}")
             
             avg_loss = epoch_loss / steps_per_epoch
             train_accuracy = self.evaluate(X_train, y_train)
-            if X_train is not None and y_train is not None:
+            if X_val is not None and y_val is not None:
+                #train_loss = compute_loss(X_train_as_tensor, y_train_as_tensor)
+                #train_losses.append(train_loss)
+                train_losses.append(avg_loss)
+                validation_loss = compute_loss(X_val, y_val).numpy()
+                validation_losses.append(validation_loss)
+
                 test_accuracy = self.evaluate(X_val, y_val)
                 print(f"Epoch {epoch+1}/{epochs} - avg_loss: {avg_loss:.4f} - train accuracy: {train_accuracy:.2f} - test accuracy: {test_accuracy:.2f}")
             else:
                 print(f"Epoch {epoch+1}/{epochs} - avg_loss: {avg_loss:.4f} - train accuracy: {train_accuracy:.2f}")
+
+        return train_losses, validation_losses
 
     def predict(self, X):
         @TinyJit
