@@ -49,6 +49,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'prot_struct.middleware.GlobalExceptionMiddleware',
 ]
 
 ROOT_URLCONF = "prot_struct.urls"
@@ -95,6 +96,8 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
 ]
 
+REST_FRAMEWORK = {'EXCEPTION_HANDLER': 
+    'my_project.my_app.my_custom_except_handler.custom_exception_handler'}
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
