@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render 
 from .seq_form import SequenceForm
 import re
@@ -8,6 +8,8 @@ from .custom_exceptions import InvalidSequenceException
 
 
 def sequence(request):
+    secondary_struc = list("HECTGSPIB")
+
     if request.method == "POST":
         form = SequenceForm(request.POST)
         if form.is_valid():
@@ -21,16 +23,22 @@ def sequence(request):
         else:
             # Give message the inference may take a little while
             # Re-direct to results page:
-            model = pickle.load(f"../ml_infer/pickled_models/{model_name}.pkl")
-            prediction = model.predict(sequence)
-            # Use the softmax predictions to show the distribution.
-            pass
+            # model = pickle.load(f"../ml_infer/pickled_models/{model_name}.pkl")
+            # prediction = model.predict(sequence)
+            prediction = [0.1, 0.2, 0.1, 0.4, 0.05, 0.05, 0.05, 0.05, 0.05]
+            max_val = max(prediction) 
+            pred_data = {secondary_struc[i]: prediction[i] for i in range(len(prediction))}
+
     else:
-        context = {} 
         form = SequenceForm()
-        context['form'] = form 
-        return render(request, "prot_struct/seq.html", context) 
-    
+        pred_data = {secondary_struc[i]: 0 for i in range(len(secondary_struc))}
+        max_val = 1
+    context = {} 
+    context['form'] = form 
+    context['hist_data'] = pred_data
+    context['max_val'] = max_val
+    return render(request, "prot_struct/seq.html", context) 
+
 
 def handle_invalid_sequence(request, exception=None):
     return render(request, 'errors/403_custom.html', status=403)
