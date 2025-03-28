@@ -55,8 +55,11 @@ class MLPModel:
         self.optim = nn.optim.Adam(nn.state.get_parameters(self.model), lr=0.001)
 
     def to_windows(self, X, y):
-        secondary_structures = "HECTGSPIB"
+        # secondary_structures = "HECTGSPIB"
+        secondary_structures = ['G', 'H', 'I', 'E', 'B', 'T', 'S', 'C', 'P']
         secondary_structure_to_idx = {ss: i for i, ss in enumerate(secondary_structures)}
+        # print(secondary_structure_to_idx)
+
         amino_acids = "ACDEFGHIKLMNPQRSTVWY"
         num_amino_acids = len(amino_acids)
         aa_to_idx = {aa: i for i, aa in enumerate(amino_acids)}
@@ -77,6 +80,7 @@ class MLPModel:
                 # NOTE: Output structure is the middle element of the window, same as the matlab example. 
                 #       May want to consider more big brain approaches in the future.
                 label = struct[i + self.window_length // 2]
+                # print(label, secondary_structure_to_idx[label])
                 # Create "one-hot encoding" for the current amino acids in the window
                 for pos, aa in enumerate(window):
                     if aa in aa_to_idx:
@@ -87,7 +91,7 @@ class MLPModel:
                 # if l > 2: 
                 #     l = 2
                 # windows_y[window_idx] = l
-                # window_idx += 1
+                window_idx += 1
 
         print("Number of sequences", len(X))
         print("Number of windows", len(windows_X))
