@@ -1,6 +1,12 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.utils.data import DataLoader, TensorDataset
+import pandas as pd
+import numpy as np
+from torch.optim.lr_scheduler import StepLR
+import matplotlib.pyplot as plt
+
 
 class LSTMNet(nn.Module):
     def __init__(self, input_size, out_size):
@@ -29,7 +35,7 @@ class LSTMNet(nn.Module):
         return F.log_softmax(x, dim=1)
 
 
-    def train(self, device, train_loader, optimizer, epoch):
+    def train_model(self, device, train_loader, optimizer, epoch):
         self.train()
         running_loss = 0.0
         for batch_idx, (data, target) in enumerate(train_loader):

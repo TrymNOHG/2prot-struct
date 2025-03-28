@@ -53,7 +53,7 @@ if __name__ == "__main__":
     df = pd.read_csv("nico_99.csv")
     train_loader, val_loader, test_loader = get_dataloaders(df)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cpu")
     model = LSTMNet(input_size=df.shape[1] - 3, out_size=9).to(device)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=0.0003)
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     validation_accuracies = []
 
     for epoch in range(15):
-        train_loss = model.train(device, train_loader, optimizer, epoch)
+        train_loss = model.train_model(device, train_loader, optimizer, epoch)
         train_losses.append(train_loss)
 
         val_loss, val_acc = model.evaluate(device, val_loader, mode="Validation")
@@ -84,5 +84,6 @@ if __name__ == "__main__":
         y_true.extend(target.cpu().numpy())
         y_pred.extend(output.argmax(dim=1).cpu().numpy())
 
+    print(y_true, y_pred)
     results = evaluate_classification(y_true, y_pred)
     evaluation_summary(results)
