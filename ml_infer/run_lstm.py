@@ -5,6 +5,8 @@ import pandas as pd
 import numpy as np
 from torch.optim.lr_scheduler import StepLR
 import matplotlib.pyplot as plt
+from eval_model import evaluate_classification, evaluation_summary
+from gen_graphs import loss_graph
 
 def plot_loss(loss, dataset_type: str):
     plt.plot(range(1, len(loss) + 1), loss, marker='x', label=f'{dataset_type} Loss')
@@ -52,25 +54,35 @@ if __name__ == "__main__":
     train_loader, val_loader, test_loader = get_dataloaders(df)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = LSTMNet(input_size=X.shape[1], out_size=9).to(device)
+    model = LSTMNet(input_size=df.shape[1] - 3, out_size=9).to(device)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=0.0003)
     scheduler = StepLR(optimizer, step_size=10, gamma=0.7)
 
     train_losses = []
-    train_accuracies = []
     validation_losses = []
     validation_accuracies = []
 
     for epoch in range(15):
         train_loss = model.train(device, train_loader, optimizer, epoch)
         train_losses.append(train_loss)
+
         val_loss, val_acc = model.evaluate(device, val_loader, mode="Validation")
         validation_losses.append(val_loss)
         validation_accuracies.append(val_acc)
+
         scheduler.step()
 
     test_loss, test_acc = model.evaluate(device, test_loader, mode="Test")
 
-    plot_loss(train_losses, "Train")
-    plot_loss(validation_losses, "Validation")
+    loss_graph(train_losses, validation_losses, "lstm")
+
+    y_true, y_pred = [], []
+    for data, target in test_loader:
+        data, target = data.to(device), target.to(device)
+        output = model(data)
+        y_true.extend(target.cpu().numpy())
+        y_pred.extend(output.argmax(dim=1).cpu().numpy())
+
+    results = evaluate_classification(y_true, y_pred)
+    evaluation_summary(results)

@@ -50,7 +50,7 @@ if __name__ == "__main__":
             run_model.store_data(X_train, y_train, X_test, y_test, X_val, y_val, STORE_DATA_FILENAME)
 
     train_losses, validation_losses = model.fit(X_train, y_train, X_val, y_val, epochs=5)
-    gen_graphs.loss_graph(train_losses, validation_losses)
+    gen_graphs.loss_graph(train_losses, validation_losses, "embedding_model")
 
 
     y_pred = model.predict(X_test)

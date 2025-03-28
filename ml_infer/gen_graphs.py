@@ -43,7 +43,7 @@ def data_distribution():
     plot_distribution(val_counts, "Validation Set Distribution", "val_distribution.png")
 
 
-def loss_graph(train_losses, validation_losses):
+def loss_graph(train_losses, validation_losses, model_name = "model"):
     os.makedirs("graphs", exist_ok=True)
 
     plt.figure(figsize=(8, 5))
@@ -57,7 +57,7 @@ def loss_graph(train_losses, validation_losses):
     plt.grid(True, linestyle="--", alpha=0.7)
     
     # Save the figure
-    plt.savefig(os.path.join("graphs", "loss_curve.png"))
+    plt.savefig(os.path.join("graphs", f"{model_name}_loss_curve.png"))
     plt.close()
 
 
