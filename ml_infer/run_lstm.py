@@ -1,4 +1,4 @@
-from models.ltsm_net import LSTMNet
+from models.lstm_net import LSTMNet
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 import pandas as pd
