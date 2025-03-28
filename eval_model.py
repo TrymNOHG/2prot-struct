@@ -33,8 +33,8 @@ secondary_structures = "HECTGSPIB"
 
 
 # TODO: y_probab
+# Returns a dict containing the various metrics and figures
 def evaluate_classification(y_true, y_pred, y_pred_proba=None):
-    # Returns a dict containing the various metrics and figures
     # Convert character labels to integers if needed
     if isinstance(y_true[0], str):
         label_map = {c: i for i, c in enumerate(secondary_structures)}
@@ -67,6 +67,15 @@ def evaluate_classification(y_true, y_pred, y_pred_proba=None):
     
     fig_cm = plot_confusion_matrix(cm, secondary_structures)
     results["confusion_matrix_plot"] = fig_cm
+
+    # AUC ROC
+    # Cross-entropy
+    if y_pred_proba:
+        # Cross-entropy (log loss)
+        results["log_loss"] = log_loss(y_true, y_pred_proba, labels=range(len(secondary_structures)))
+        results["roc_auc_macro"] = roc_auc_score(y_true, y_pred_proba, multi_class="ovr", average="macro")
+        results["roc_auc_weighted"] = roc_auc_score(y_true, y_pred_proba, multi_class="ovr", average="weighted")
+        results["roc_auc_per_class"] = roc_auc_score(y_true, y_pred_proba, multi_class="ovr", average=None)
 
     return results
 

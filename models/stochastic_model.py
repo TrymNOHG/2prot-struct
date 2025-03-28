@@ -7,7 +7,8 @@ class StochasticModel:
     def __init__(self):
         self.probs = None
 
-    def fit(self, y):
+    def fit(self, X, y):
+        # Note that X is not used in this model, only added for compatibility with the interface
         self.probs = defaultdict(int)
         sum_vals = 0
         for input in y:
@@ -16,6 +17,9 @@ class StochasticModel:
                 self.probs[dssp.upper()] += 1
         for keys in self.probs:
             self.probs[keys] /= sum_vals
+
+        # Again, this is just to be compatible with the interface
+        return None, None
 
     def predict(self, X):
         if self.probs is None:
