@@ -1,3 +1,4 @@
+import pickle
 from models.lstm_net import LSTMNet
 import torch
 from torch.utils.data import DataLoader, TensorDataset
@@ -87,3 +88,7 @@ if __name__ == "__main__":
     print(y_true, y_pred)
     results = evaluate_classification(y_true, y_pred)
     evaluation_summary(results)
+
+    with open("pickled_models/lstm_model.pkl", "wb") as f:
+        pickle.dump(model.state_dict(), f)
+    print("Model saved as lstm_model.pkl")
