@@ -21,7 +21,7 @@ def sequence(request):
         else:
             # Give message the inference may take a little while
             pred_data, output_data, max_vals = infer(model_name, secondary_struct, sequences)
-            
+
 
     else:
         form = SequenceForm()

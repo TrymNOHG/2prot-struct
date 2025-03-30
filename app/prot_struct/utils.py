@@ -6,8 +6,11 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from preprocess.create_embeddings import embed_sequence
-from ml_infer import models
-from ml_infer.models import *
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "./ml_infer/")))
+from ml_infer.models.stochastic_model import StochasticModel
+from ml_infer.models.naive_bayes_model import NaiveBayesModel
+# from ml_infer import models
+# from ml_infer.models import *
 
 def infer(model_name, secondary_struct, sequences):
     with open(f'../ml_infer/pickled_models/{model_name}', 'rb') as f:
