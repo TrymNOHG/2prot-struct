@@ -52,6 +52,7 @@ def run_stochastic():
     # X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=42)
     print("Number of data points in training set", len(X_train))
     model.fit(y_train)
+    model.pickle_model()
 
     y_pred = model.predict(y_test)
 
@@ -72,6 +73,7 @@ def run_naive_bayes():
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     model.fit(X_train, y_train)
+    model.pickle_model()
     y_pred = model.predict(flatten_sequence(X_test))
 
     y_test = flatten_sequence(y_test)
@@ -119,6 +121,7 @@ def run_mlp_window():
             store_data(X_train, y_train, X_test, y_test, X_val, y_val, STORE_DATA_FILENAME)
 
     train_losses, validation_losses = model.fit(X_train, y_train, X_val, y_val)
+    model.pickle_model()
     loss_graph(train_losses, validation_losses)
     y_pred = model.predict(X_test)
     if STORE_PREDICTIONS:

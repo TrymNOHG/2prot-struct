@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import pickle
 from tinygrad import Tensor, nn, Device, TinyJit
 
 print(Device.DEFAULT)
@@ -184,6 +185,15 @@ class MLPWindowModel:
         predictions = predict(Tensor(X)).numpy()
         return predictions
 
+    def forward(self, X):
+        @TinyJit
+        def forward(X):
+            Tensor.training = False
+            return self.model(X).softmax()
+
+        output_distributions = forward(Tensor(X)).numpy()
+        return output_distributions
+
     def evaluate(self, X, y):
         # If not already, turn into TinyGrad tensors
         if not isinstance(X, Tensor):
@@ -201,3 +211,8 @@ class MLPWindowModel:
         accuracy = evaluate(X, y).item()
         # print(f"Accuracy on {X.shape[0]} windows :: {accuracy:.4f}%")
         return accuracy
+    
+    def pickle_model(self):
+        file_name = "pickled_models/mlp_window.pkl"
+        with open(file_name, 'wb') as f:
+            pickle.dump(self, f)

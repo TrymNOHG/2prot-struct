@@ -1,6 +1,8 @@
 import numpy as np
 import random
+import pickle
 from collections import defaultdict
+
 # Simply calculate the relative probability of structure given a certain amino acid
 class NaiveBayesModel:
     def __init__(self):
@@ -42,6 +44,40 @@ class NaiveBayesModel:
             probs = np.array(self.probs[x.upper()])
             vals.append(self.classes[np.argmax(probs)])
         return "".join(vals)
+
+    def forward(self, X):
+        if not self.probs:
+            raise ValueError("Model must be fit before calling forward.")
+
+        output_distributions = []
+        for seq in X:
+            sequence_probs = []
+            for aa in seq:
+                aa = aa.upper()
+                if aa not in self.aa:
+                    # If it's an unknown amino acid, assign uniform probabilities
+                    prob_dist = {c: 1/len(self.classes) for c in self.classes}
+                else:
+                    # Use Bayes rule: P(structure | aa) ∝ P(aa | structure) * P(structure)
+                    numerator = []
+                    for i, c in enumerate(self.classes):
+                        # P(aa | structure) = Bayes inversion of P(structure | aa), approx via:
+                        # P(structure | aa) * P(aa) / P(structure)
+                        # But since P(aa | structure) isn't directly stored, we approximate:
+                        # P(structure | aa) * P(structure) / P(aa)
+                        p_struct_given_aa = self.probs[aa][i]
+                        p_struct = self.p_struct[c]
+                        p_aa = self.p_aa[aa]
+                        numerator.append((p_struct_given_aa * p_struct) / p_aa if p_aa > 0 else 0.0)
+
+                    total = sum(numerator)
+                    prob_dist = {
+                        self.classes[i]: numerator[i] / total if total > 0 else 0.0
+                        for i in range(len(self.classes))
+                    }
+
+                sequence_probs.append(prob_dist)
+            output_distributions.append(sequence_probs)
     
     def predict_rand(self, X: list):
         output = []
@@ -131,6 +167,12 @@ class NaiveBayesModel:
             accuracy = correct / len(actual_pred)
             accuracies.append(accuracy)
         return np.mean(accuracies)
+
+
+    def pickle_model(self):
+        file_name = "pickled_models/naive_bayes.pkl"
+        with open(file_name, 'wb') as f:
+            pickle.dump(self, f)
 
 
 # p(lab|aa) = p(aa|lab) * p(lab) / p(aa)
