@@ -2,7 +2,7 @@ import numpy as np
 import random
 from collections import defaultdict
 # Simply calculate the relative probability of structure given a certain amino acid
-class NaiveBayes:
+class NaiveBayesModel:
     def __init__(self):
         # probs essentially represents p(lab | aa)?
         self.probs = {} # Key will represent amino acid. Value will represent probability for label.
