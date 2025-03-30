@@ -5,7 +5,7 @@ import re
 import pickle
 from requests import ConnectionError
 from .custom_exceptions import InvalidSequenceException
-
+import torch
 
 def sequence(request):
     secondary_struc = list("HECTGSPIB")
@@ -23,9 +23,13 @@ def sequence(request):
         else:
             # Give message the inference may take a little while
             # Re-direct to results page:
-            # model = pickle.load(f"../ml_infer/pickled_models/{model_name}.pkl")
-            # prediction = model.predict(sequence)
-            prediction = [0.1, 0.2, 0.1, 0.4, 0.05, 0.05, 0.05, 0.05, 0.05]
+            print(f'../ml_infer/pickled_models/{model_name}')
+            with open(f'../ml_infer/pickled_models/{model_name}', 'rb') as f:
+                model = torch.load(f=f, weights_only=False, map_location=torch.device('cpu'))
+            # Create embeddings
+            t = torch.Tensor(sequence)
+            prediction = model.forward(t)
+            # prediction = [0.1, 0.2, 0.1, 0.4, 0.05, 0.05, 0.05, 0.05, 0.05]
             max_val = max(prediction) 
             pred_data = {secondary_struc[i]: prediction[i] for i in range(len(prediction))}
 
