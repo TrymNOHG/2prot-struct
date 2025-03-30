@@ -38,45 +38,41 @@ def embed_dataset(dataset_seqs, dataset_structs, shift_left=1, shift_right=-1, o
         df_embeddings = pd.DataFrame(all_embeddings, columns=embedding_columns + ["amino_acid", "secondary_structure"])
         df_embeddings.to_csv(output_file, mode="a", index=False, header=False)
 
-def embed_sequence(dataset_seqs, dataset_structs, shift_left=1, shift_right=-1, batch_size=1000):
+def embed_sequence(dataset_seqs, shift_left=1, shift_right=-1):
     embedding_columns = [f"c{i+1}" for i in range(1024)]
+    all_embeddings = []
 
-    for i in range(0, len(dataset_seqs), batch_size):
-        batch_seqs = dataset_seqs[i:i+batch_size]
-        batch_structs = dataset_structs[i:i+batch_size]
-        all_embeddings = []
+    for seq in tqdm(dataset_seqs):
+        with torch.no_grad():
+            ids = tokenizer.batch_encode_plus([seq], add_special_tokens=True, padding=True, is_split_into_words=True, return_tensors="pt")
+            embedding = model(input_ids=ids['input_ids'].to(device), attention_mask=ids['attention_mask'].to(device))
+            embedding_np = embedding[0].detach().cpu().numpy()[shift_left:shift_right]
 
-        for seq, struct in tqdm(zip(batch_seqs, batch_structs), total=len(batch_seqs)):
-            with torch.no_grad():
-                ids = tokenizer.batch_encode_plus([seq], add_special_tokens=True, padding=True, is_split_into_words=True, return_tensors="pt")
-                embedding = model(input_ids=ids['input_ids'].to(device), attention_mask=ids['attention_mask'].to(device))
-                embedding_np = embedding[0].detach().cpu().numpy()[shift_left:shift_right]
+            for embed_vec in embedding_np:
+                all_embeddings.append(list(embed_vec))
 
-                for embed_vec, aa, sec_struct in zip(embedding_np, seq.split(), struct):
-                    all_embeddings.append(list(embed_vec) + [aa, sec_struct])
-
-    df_embeddings = pd.DataFrame(all_embeddings, columns=embedding_columns + ["aa", "dssp8"])
+    df_embeddings = pd.DataFrame(all_embeddings, columns=embedding_columns)
     return df_embeddings
 
 
 tokenizer = BertTokenizer.from_pretrained("Rostlab/prot_bert")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = ProteinLM().to(device)
+if __name__ == "__main__":
+    df = pd.read_csv("data.csv", dtype={"input": str, "dssp8": str})
 
-df = pd.read_csv("data.csv", dtype={"input": str, "dssp8": str})
+    df["input"] = df["input"].str.upper()
+    df["dssp8"] = df["dssp8"].str.upper()
 
-df["input"] = df["input"].str.upper()
-df["dssp8"] = df["dssp8"].str.upper()
+    df = df[df["input"].str.len() <= 200]
+    print("\nFiltered DataFrame:")
+    print(df.head())
 
-df = df[df["input"].str.len() <= 200]
-print("\nFiltered DataFrame:")
-print(df.head())
+    seq_list = [' '.join(list(seq)) for seq in df["input"]]
+    struct_list = df["dssp8"].tolist()
 
-seq_list = [' '.join(list(seq)) for seq in df["input"]]
-struct_list = df["dssp8"].tolist()
+    embed_dataset(seq_list, struct_list, output_file="embeddings.csv")
 
-embed_dataset(seq_list, struct_list, output_file="embeddings.csv")
-
-df_embeddings = pd.read_csv("embeddings.csv")
-print("\nGenerated Embeddings DataFrame:")
-print(df_embeddings.head())
+    df_embeddings = pd.read_csv("embeddings.csv")
+    print("\nGenerated Embeddings DataFrame:")
+    print(df_embeddings.head())
