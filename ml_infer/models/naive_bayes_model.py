@@ -1,11 +1,13 @@
 import numpy as np
 import random
 from collections import defaultdict
+
+
 # Simply calculate the relative probability of structure given a certain amino acid
 class NaiveBayesModel:
     def __init__(self):
         # probs essentially represents p(lab | aa)?
-        self.probs = {} # Key will represent amino acid. Value will represent probability for label.
+        self.probs = {}  # Key will represent amino acid. Value will represent probability for label.
         self.classes = ['G', 'H', 'I', 'E', 'B', 'T', 'S', 'C', 'P']
         self.aa = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
         self.p_aa = defaultdict(int)
@@ -42,47 +44,47 @@ class NaiveBayesModel:
             probs = np.array(self.probs[x.upper()])
             vals.append(self.classes[np.argmax(probs)])
         return "".join(vals)
-    
+
     def predict_rand(self, X: list):
         output = []
         for x in X:
             probs = np.array(self.probs[x.upper()])
             rand = random.random()
-            i = 0 
+            i = 0
             while rand > probs[i]:
                 rand -= probs[i]
                 i += 1
             output.append(self.classes[i])
         return "".join(output)
-    
+
     def predict_bayes(self, X):
         output = []
         for x in X:
             probs = np.array([])
             for struct in self.classes:
-                probability = self.probs[x.upper()][self.classes.index(struct)] * self.p_struct[struct] / self.p_aa[x.upper()]
+                probability = self.probs[x.upper()][self.classes.index(struct)] * self.p_struct[struct] / self.p_aa[
+                    x.upper()]
                 # probability = self.probs[x.upper()][self.classes.index(struct)] * self.p_struct[struct]
                 probs = np.append(probs, probability)
             output.append(self.classes[np.argmax(probs)])
         return "".join(output)
-    
+
     def predict_bayes_rand(self, X):
         output = []
         for x in X:
             probs = np.array([])
             for struct in self.classes:
-                probability = self.probs[x.upper()][self.classes.index(struct)] * self.p_struct[struct] / self.p_aa[x.upper()]
+                probability = self.probs[x.upper()][self.classes.index(struct)] * self.p_struct[struct] / self.p_aa[
+                    x.upper()]
                 # probability = self.probs[x.upper()][self.classes.index(struct)] * self.p_struct[struct]
                 probs = np.append(probs, probability)
             rand = random.random()
-            i = 0 
+            i = 0
             while rand > probs[i]:
                 rand -= probs[i]
                 i += 1
             output.append(self.classes[i])
         return "".join(output)
-
-
 
     def evaluate(self, X, y):
         accuracies = []
@@ -107,7 +109,7 @@ class NaiveBayesModel:
             accuracy = correct / len(actual_pred)
             accuracies.append(accuracy)
         return np.mean(accuracies)
-    
+
     def evaluate_bayes(self, X, y):
         accuracies = []
         for i in range(len(X)):
@@ -119,7 +121,7 @@ class NaiveBayesModel:
             accuracy = correct / len(actual_pred)
             accuracies.append(accuracy)
         return np.mean(accuracies)
-    
+
     def evaluate_bayes_rand(self, X, y):
         accuracies = []
         for i in range(len(X)):
@@ -131,6 +133,5 @@ class NaiveBayesModel:
             accuracy = correct / len(actual_pred)
             accuracies.append(accuracy)
         return np.mean(accuracies)
-
 
 # p(lab|aa) = p(aa|lab) * p(lab) / p(aa)

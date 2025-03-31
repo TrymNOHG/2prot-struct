@@ -29,7 +29,7 @@ class LSTMNet(nn.Module):
         return F.log_softmax(x, dim=1)
 
 
-    def train_model(self, device, train_loader, optimizer, epoch):
+    def train(self, device, train_loader, optimizer, epoch):
         self.train()
         running_loss = 0.0
         for batch_idx, (data, target) in enumerate(train_loader):

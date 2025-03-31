@@ -22,20 +22,7 @@ git clone git@github.com:TrymNOHG/2prot-struct.git
 ```
 
 ### Run the Web Application
-To run and use the application:
-1. Ensure all dependencies are installed by running:
-```bash
-pip install -r requirements.txt
-```
-2. Navigate to the backend directory and Apply migrations:
-```bash
-cd .\backend\
-python manage.py makemigrations && python manage.py migrate
-```
-3. Start the server:
-```bash
-python manage.py runserver
-```
+To run and use the application see the README.md file in './app' folder. 
 
 ## Secondary Structure Prediction
 

@@ -1,4 +1,4 @@
-from models.lstm_net import LSTMNet
+from .models.ltsm_net import LSTMNet
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 import pandas as pd
@@ -47,7 +47,6 @@ def get_dataloaders(df: pd.DataFrame):
     test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
     return train_loader, val_loader, test_loader
-
 
 
 

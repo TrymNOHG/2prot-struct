@@ -17,11 +17,11 @@ from ml_infer.models.mlp_window_model import MLPModel, MLPEmbeddings
 # NOTE: A lot of code here is basically the same as run_model.py
 #       These two files can be unified at some point, but for current experimentation it's eadsier to keep them separate
 
-LOAD_DATA = False 
+LOAD_DATA = False
 LOAD_DATA_FILENAME = "data/95_embedding_data.pkl"
 STORE_DATA = True
 STORE_DATA_FILENAME = "data/95_embedding_data.pkl"
-STORE_PREDICTIONS = True 
+STORE_PREDICTIONS = True
 STORE_PREDICTIONS_FILENAME = "data/95_predictions.pkl"
 
 if __name__ == "__main__":
@@ -38,7 +38,7 @@ if __name__ == "__main__":
         y = np.array([secondary_structure_to_idx[label] for label in y])
         split = df["split"].values
         X = df.drop(columns=['aa', 'dssp8', 'split']).values
-        del df 
+        del df
         gc.collect()
         X_train = X[split == "train"]
         y_train = y[split == "train"]
@@ -54,7 +54,7 @@ if __name__ == "__main__":
             run_model.store_data(X_train, y_train, X_test, y_test, X_val, y_val, STORE_DATA_FILENAME)
 
     train_losses, validation_losses = model.fit(X_train, y_train, X_val, y_val, epochs=5)
-    gen_graphs.loss_graph(train_losses, validation_losses, "embedding_model")
+    gen_graphs.loss_graph(train_losses, validation_losses)
 
 
     y_pred = model.predict(X_test)
