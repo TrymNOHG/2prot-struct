@@ -1,24 +1,143 @@
 {% extends "prot_struct/base.html" %}
 {% block content %}
-<body>
-    <form action="" method="post" class="max-w-md mx-auto mt-10 p-6 bg-white rounded-2xl shadow-md space-y-4">
-        {% csrf_token %}
-        
-        {% for field in form %}
-        <div>
-            <label for="{{ field.id_for_label }}" class="block mb-1 text-sm font-medium text-gray-700">
-                {{ field.label }}
-            </label>
-            {{ field }}
-            {% if field.errors %}
-            <p class="text-red-500 text-xs mt-1">{{ field.errors|striptags }}</p>
-            {% endif %}
-        </div>
-        {% endfor %}
-        
-        <button type="submit" class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow">
-            Create
-        </button>
+<div class="min-h-screen bg-gray-100 flex items-start justify-center py-12 px-4">
+  <style>
+    #output span,
+    #sequence span {
+      display: inline-block;
+    }
+    textarea {
+      border: 1px solid black;
+    }
+  </style>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-12 w-full max-w-6xl">
+
+    <form action="" method="post" class="bg-white p-6 rounded-2xl shadow-md space-y-4">
+      {% csrf_token %}
+
+      {% for field in form %}
+      <div>
+        <label for="{{ field.id_for_label }}" class="block mb-1 text-sm font-medium text-gray-700">
+          {{ field.label }}
+        </label>
+        {{ field }}
+        {% if field.errors %}
+        <p class="text-red-500 text-xs mt-1">{{ field.errors|striptags }}</p>
+        {% endif %}
+      </div>
+      {% endfor %}
+
+      <button type="submit" class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow">
+        Predict
+      </button>
     </form>
-</body>
+
+    {% if hist_data %}
+    <div class="relative">
+
+      <div class="flex justify-center gap-4 mb-4">
+        <button onclick="prevSlide()" class="px-4 py-2 text-white bg-gray-800 rounded hover:bg-gray-600">
+          &#8592;
+        </button>
+        <button onclick="nextSlide()" class="px-4 py-2 text-white bg-gray-800 rounded hover:bg-gray-600">
+          &#8594;
+        </button>
+      </div>
+
+      <div id="carousel" class="flex items-end justify-center space-x-4 bg-white p-6 rounded-2xl shadow-md h-[300px] overflow-y-auto"></div>
+      
+      <div class="px-10">
+        <br>
+        <div class="text-sm text-gray-500 text-center">Output</div>
+        <div id="output" class="text-sm text-gray-500 text-center break-words"></div>
+        <div class="text-sm text-gray-500 text-center mt-2">Input</div>
+        <div id="sequence" class="text-sm text-gray-500 text-center break-words"></div>
+      </div>
+     
+      <div class="bg-white p-6 rounded-2xl shadow-md space-y-2 text-sm text-gray-800 max-w-md mt-6">
+        <h2 class="text-lg font-semibold mb-2">Secondary Structure Legend</h2>
+        <ul class="grid grid-cols-2 gap-x-6 gap-y-1">
+          <li><span class="font-mono text-blue-700">G</span> – 3₁₀ helix</li>
+          <li><span class="font-mono text-blue-700">H</span> – α-helix</li>
+          <li><span class="font-mono text-blue-700">I</span> – π-helix</li>
+          <li><span class="font-mono text-blue-700">E</span> – β-sheet</li>
+          <li><span class="font-mono text-blue-700">B</span> – β-bridge</li>
+          <li><span class="font-mono text-blue-700">T</span> – Helix turn</li>
+          <li><span class="font-mono text-blue-700">S</span> – Bend</li>
+          <li><span class="font-mono text-blue-700">C</span> – Coil</li>
+          <li class="col-span-2"><span class="font-mono text-blue-700">P</span> – Polyproline II (PPII) helix <span class="text-gray-500">(sometimes included in Q8 prediction)</span></li>
+        </ul>
+      </div>
+
+    </div>
+  
+    <script>
+      const histData = {{ hist_data|safe }};
+      const maxVals = {{ max_vals|safe }};
+      const seq = "{{ sequence|escapejs }}";
+      const output = "{{ output_data|escapejs }}";
+      let currentIndex = 0;
+      
+      function renderSlide(index) {
+        const maxVal = maxVals[index];
+        const container = document.getElementById("carousel");
+        container.innerHTML = "";
+
+        Object.entries(histData[index]).forEach(([label, proba]) => {
+          const height = Math.round((proba / maxVal) * 200);
+          const isMax = proba === maxVal;
+
+          container.innerHTML += `
+            <div class="flex flex-col items-center space-y-1 group relative">
+              <div class="-top-8 opacity-0 absolute group-hover:opacity-100 group-hover:-translate-y-1 transition-all transform duration-200 bg-gray-700 text-white text-xs rounded py-1 px-2 pointer-events-none z-10">
+                ${(proba*100).toFixed(2)}%
+              </div>
+              <div
+                class="w-10 rounded-t-lg transition-all duration-300"
+                style="
+                  height: ${height}px;
+                  background-color: ${isMax ? '#16a34a' : '#3b82f6'};">
+              </div>
+              <span class="text-xs font-medium text-gray-700">${label}</span>
+            </div>
+          `;
+        });
+
+        let outDisplayHTML = "";
+        for (let i = 0; i < output.length; i++) {
+          if (i === index) {
+            outDisplayHTML += `<span class="font-bold text-red-600 underline">${output[i]}</span>`;
+          } else {
+            outDisplayHTML += `<span class="text-gray-600">${output[i]}</span>`;
+          }
+        }
+        document.getElementById('output').innerHTML = outDisplayHTML;
+
+        let seqDisplayHTML = "";
+        for (let i = 0; i < seq.length; i++) {
+          if (i === index) {
+            seqDisplayHTML += `<span class="font-bold text-red-600 underline">${seq[i]}</span>`;
+          } else {
+            seqDisplayHTML += `<span class="text-gray-600">${seq[i]}</span>`;
+          }
+        }
+        document.getElementById('sequence').innerHTML = seqDisplayHTML;
+      }
+
+      function prevSlide() {
+        currentIndex = (currentIndex - 1 + histData.length) % histData.length;
+        renderSlide(currentIndex);
+      }
+
+      function nextSlide() {
+        currentIndex = (currentIndex + 1) % histData.length;
+        renderSlide(currentIndex);
+      }
+
+      renderSlide(currentIndex);
+    </script>
+    {% endif %}
+
+  </div>
+</div>
 {% endblock %}

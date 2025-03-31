@@ -20,30 +20,18 @@ class MLP:
     x = self.l2(x).relu()
     return self.l3(x)
 
-class LinearCro:
-  def __init__(self, in_features, out_features, bias=True, initialization: str='kaiming_uniform'):
-    self.weight = getattr(Tensor, initialization)(out_features, in_features)
-    self.bias = Tensor.zeros(out_features) if bias else None
-
-  def __call__(self, x):
-    return x.linear(self.weight.transpose(), self.bias)
-
 class MLPEmbeddings:
     def __init__(self):
         self.l1 = nn.Linear(642, 256)
         self.l2 = nn.Linear(256, 128)
         self.l3 = nn.Linear(128, 8)
-        # self.l1 = LinearCro(1024, 512)
-        # self.l2 = LinearCro(512, 128)
-        # self.l3 = LinearCro(128, 8)
-
     def __call__(self, x:Tensor) -> Tensor:
         x = self.l1(x.flatten(1)).relu()
         x = self.l2(x).selu()
         return self.l3(x)
 
 
-class MLPModel:
+class MLPWindowModel:
     def __init__(self, window_length=17, model=None):
         if window_length % 2 == 0:
             print("WARNING: Window length should probably be an odd number!")
@@ -55,8 +43,11 @@ class MLPModel:
         self.optim = nn.optim.Adam(nn.state.get_parameters(self.model), lr=0.001)
 
     def to_windows(self, X, y):
-        secondary_structures = "HECTGSPIB"
+        # secondary_structures = "HECTGSPIB"
+        secondary_structures = ['G', 'H', 'I', 'E', 'B', 'T', 'S', 'C', 'P']
         secondary_structure_to_idx = {ss: i for i, ss in enumerate(secondary_structures)}
+        # print(secondary_structure_to_idx)
+
         amino_acids = "ACDEFGHIKLMNPQRSTVWY"
         num_amino_acids = len(amino_acids)
         aa_to_idx = {aa: i for i, aa in enumerate(amino_acids)}
@@ -77,6 +68,7 @@ class MLPModel:
                 # NOTE: Output structure is the middle element of the window, same as the matlab example. 
                 #       May want to consider more big brain approaches in the future.
                 label = struct[i + self.window_length // 2]
+                # print(label, secondary_structure_to_idx[label])
                 # Create "one-hot encoding" for the current amino acids in the window
                 for pos, aa in enumerate(window):
                     if aa in aa_to_idx:
@@ -87,7 +79,7 @@ class MLPModel:
                 # if l > 2: 
                 #     l = 2
                 # windows_y[window_idx] = l
-                # window_idx += 1
+                window_idx += 1
 
         print("Number of sequences", len(X))
         print("Number of windows", len(windows_X))
