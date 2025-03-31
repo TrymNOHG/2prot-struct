@@ -8,4 +8,4 @@ To run the application, first install Django using:
 
 Then, to run the actual web server, run:
 
-`python manage.py migrate & python manage.py runserver`
+`python manage.py migrate && python manage.py runserver`

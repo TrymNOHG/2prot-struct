@@ -1,6 +1,15 @@
 {% extends "prot_struct/base.html" %}
 {% block content %}
 <div class="min-h-screen bg-gray-100 flex items-start justify-center py-12 px-4">
+  <style>
+    #output span,
+    #sequence span {
+      display: inline-block;
+    }
+    textarea {
+      border: 1px solid black;
+    }
+  </style>
   <div class="grid grid-cols-1 md:grid-cols-2 gap-12 w-full max-w-6xl">
 
     <form action="" method="post" class="bg-white p-6 rounded-2xl shadow-md space-y-4">
@@ -32,13 +41,29 @@
         &#8594;
       </button>
       <div id="carousel" class="flex items-end justify-center space-x-4 bg-white p-6 rounded-2xl shadow-md h-[300px] overflow-y-auto"></div>
-      <div class="flex flex-col items-center space-y-2 absolute bottom-2 left-1/2 transform -translate-x-1/2">
+      <div class="flex flex-col items-center space-y-2 mt-4">
         <div class="text-sm text-gray-500 text-center">Output</div>
         <div id="output" class="text-sm text-gray-500 text-center"></div>
         <div class="text-sm text-gray-500 text-center">Input</div>
         <div id="sequence" class="text-sm text-gray-500 text-center"></div>
       </div>
-      
+     
+     <!-- Secondary Structure information -->
+     <div class="bg-white p-6 rounded-2xl shadow-md space-y-2 text-sm text-gray-800 max-w-md">
+      <h2 class="text-lg font-semibold mb-2">Secondary Structure Legend</h2>
+      <ul class="grid grid-cols-2 gap-x-6 gap-y-1">
+        <li><span class="font-mono text-blue-700">G</span> – 3₁₀ helix</li>
+        <li><span class="font-mono text-blue-700">H</span> – α-helix</li>
+        <li><span class="font-mono text-blue-700">I</span> – π-helix</li>
+        <li><span class="font-mono text-blue-700">E</span> – β-sheet</li>
+        <li><span class="font-mono text-blue-700">B</span> – β-bridge</li>
+        <li><span class="font-mono text-blue-700">T</span> – Helix turn</li>
+        <li><span class="font-mono text-blue-700">S</span> – Bend</li>
+        <li><span class="font-mono text-blue-700">C</span> – Coil</li>
+        <li class="col-span-2"><span class="font-mono text-blue-700">P</span> – Polyproline II (PPII) helix <span class="text-gray-500">(sometimes included in Q8 prediction)</span></li>
+      </ul>
+    </div>
+
     </div>
   
     <script>
