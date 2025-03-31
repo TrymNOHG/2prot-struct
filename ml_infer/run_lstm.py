@@ -1,10 +1,11 @@
-from models.ltsm_net import LSTMNet
+from .models.ltsm_net import LSTMNet
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 import pandas as pd
 import numpy as np
 from torch.optim.lr_scheduler import StepLR
 import matplotlib.pyplot as plt
+import pickle
 
 def plot_loss(loss, dataset_type: str):
     plt.plot(range(1, len(loss) + 1), loss, marker='x', label=f'{dataset_type} Loss')
@@ -47,12 +48,14 @@ def get_dataloaders(df: pd.DataFrame):
 
     return train_loader, val_loader, test_loader
 
+
+
 if __name__ == "__main__":
     df = pd.read_csv("nico_99.csv")
     train_loader, val_loader, test_loader = get_dataloaders(df)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = LSTMNet(input_size=X.shape[1], out_size=9).to(device)
+    model = LSTMNet(input_size=len(df.columns)-3, out_size=9).to(device)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=0.0003)
     scheduler = StepLR(optimizer, step_size=10, gamma=0.7)
@@ -71,6 +74,8 @@ if __name__ == "__main__":
         scheduler.step()
 
     test_loss, test_acc = model.evaluate(device, test_loader, mode="Test")
+
+    pickle.dumps(model, f"./pickled_models/{model.__class__}.pkl") 
 
     plot_loss(train_losses, "Train")
     plot_loss(validation_losses, "Validation")
