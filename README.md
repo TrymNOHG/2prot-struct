@@ -9,6 +9,8 @@
 
 This application is not hosted on a dedicated server and must be run locally on your computer. Follow the instructions below to clone the repository and set up the application.
 
+![app-demo](/images/app-show.gif)
+
 ### Clone Repository
 
 #### Using HTTP:
