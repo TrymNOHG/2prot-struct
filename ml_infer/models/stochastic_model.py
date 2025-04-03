@@ -3,6 +3,7 @@ import random
 
 random.seed(42)
 
+
 class StochasticModel:
     def __init__(self):
         self.probs = None
@@ -20,7 +21,7 @@ class StochasticModel:
     def predict(self, X):
         if self.probs is None:
             raise ValueError("Model must be fit before evaluation.")
-        
+
         predictions = []
         for aa in X:
             pred = []
@@ -35,7 +36,6 @@ class StochasticModel:
             predictions.append("".join(pred))
         return predictions
 
-
     def evaluate(self, X, y):
         if self.probs is None:
             raise ValueError("Model must be fit before evaluation.")
@@ -47,6 +47,6 @@ class StochasticModel:
             for j in range(len(y[i])):
                 correct += 1 if predictions[i][j] == y[i][j] else 0
                 total += 1
-        
-        print(f"Accuracy of the model is {correct/total}")
-        return correct/total
+
+        print(f"Accuracy of the model is {correct / total}")
+        return correct / total

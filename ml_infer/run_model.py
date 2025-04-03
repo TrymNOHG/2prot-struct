@@ -19,7 +19,7 @@ def store_data(X_train, y_train, X_test, y_test, X_val, y_val, filename):
 def load_data(filename):
     with open(filename, 'rb') as f:
         return pickle.load(f)
-    
+
 
 def store_predictions(y_test, y_pred, filename):
     with open(filename, 'wb') as f:

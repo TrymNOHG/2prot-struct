@@ -49,13 +49,13 @@ def loss_graph(train_losses, validation_losses):
     plt.figure(figsize=(8, 5))
     plt.plot(train_losses, label="Training Loss", marker="o", linestyle="-")
     plt.plot(validation_losses, label="Validation Loss", marker="s", linestyle="--")
-    
+
     plt.xlabel("Epoch")
     plt.ylabel("Loss")
     plt.title("Training and Validation Loss")
     plt.legend()
     plt.grid(True, linestyle="--", alpha=0.7)
-    
+
     # Save the figure
     plt.savefig(os.path.join("graphs", "loss_curve.png"))
     plt.close()
