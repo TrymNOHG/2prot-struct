@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
     test_loss, test_acc = model.evaluate(device, test_loader, mode="Test")
 
-    pickle.dumps(model, f"./pickled_models/{model.__class__}.pkl") 
+    pickle.dumps(model, f"./pickled_models/{model.__class__}.pkl")
 
     plot_loss(train_losses, "Train")
     plot_loss(validation_losses, "Validation")
