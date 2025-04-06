@@ -11,6 +11,9 @@ This application is not hosted on a dedicated server and must be run locally on 
 
 ![app-demo](/images/app-show.gif)
 
+A more comprehensive guide can be found at:
+https://youtu.be/5C_kukZYfKQ
+
 ### Clone Repository
 
 #### Using HTTP:
